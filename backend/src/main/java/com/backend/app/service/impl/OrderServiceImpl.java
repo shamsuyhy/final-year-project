@@ -117,4 +117,14 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.countOrderByCurrentStatus(currentStatus);
     }
 
+    @Override
+    public void changeStatus(Long orderId, String nextStatus) {
+        Order order= getOrderById(orderId);
+        order.setCurrentStatus(nextStatus);
+        order.setCurrentStatusDate(LocalDateTime.now());
+        order.addStatus(new Status(order, "admin", LocalDateTime.now(),nextStatus,  ""));
+        orderRepository.save(order);
+
+    }
+
 }

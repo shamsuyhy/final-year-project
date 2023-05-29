@@ -25,5 +25,6 @@ public interface OrderService {
 
     void addStatus(Long orderId, String status,String username);
     Long countByStatus(String currentStatus);
+    void changeStatus(Long orderId,String nextStatus);
     
 }

@@ -66,4 +66,9 @@ public class OrderController {
     public ResponseEntity<Long> count(@PathVariable(name = "currentStatus") String currentStatus){
         return new ResponseEntity<>(orderService.countByStatus(currentStatus),HttpStatus.OK);
     }
+    @PutMapping("status/{nextStatus}/{orderId}")
+    public ResponseEntity changeStatus(@PathVariable(name = "nextStatus") String nextStatus, @PathVariable(name = "orderId") Long orderId){
+        orderService.changeStatus(orderId,nextStatus);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
