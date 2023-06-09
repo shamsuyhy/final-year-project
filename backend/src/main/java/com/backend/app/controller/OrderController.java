@@ -13,7 +13,7 @@ import java.util.List;
 
 import static java.lang.Long.parseLong;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "Authorization")
 @RestController
 @RequestMapping("/orders")
 public class OrderController {

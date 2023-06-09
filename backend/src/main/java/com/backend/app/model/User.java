@@ -1,6 +1,10 @@
 package com.backend.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,7 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
+@Builder
+@AllArgsConstructor
 @Entity( name = "User")
 @Table(
         name = "users"
@@ -47,6 +52,7 @@ public class User implements UserDetails {
             nullable = false,
             columnDefinition = "CHAR(60)"
     )
+    @JsonIgnore
     private String password;
     @OneToMany(
             mappedBy = "user"
@@ -103,13 +109,13 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
 
     @Override
     public String getUsername() {
-        return null;
+        return userName;
     }
 
     @Override

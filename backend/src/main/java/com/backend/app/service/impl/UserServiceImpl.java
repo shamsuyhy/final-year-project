@@ -31,6 +31,7 @@ public class UserServiceImpl implements UserService {
         else {
             throw new ResourceNotFoundException("User","username",username);
         }
+
     }
 
     @Override
