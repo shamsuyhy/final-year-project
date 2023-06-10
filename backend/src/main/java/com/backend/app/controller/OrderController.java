@@ -8,7 +8,9 @@ import org.aspectj.weaver.ast.Or;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 import static java.lang.Long.parseLong;
@@ -38,10 +40,10 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    @PostMapping("{orderId}/{productId}")
-    public ResponseEntity placeOrder(@PathVariable(name = "orderId") Long orderId,@PathVariable(name = "productId") String productId){
+    @PostMapping("{orderId}/{productId}/{quantity}")
+    public ResponseEntity placeOrder(@PathVariable(name = "orderId") Long orderId,@PathVariable(name = "productId") String productId,@PathVariable(name = "quantity") Integer quantity){
 
-        orderService.placeProductOrder(orderId,productId);
+        orderService.placeProductOrder(orderId,productId,quantity);
         return new ResponseEntity(HttpStatus.OK);
     }
     @GetMapping("{orderId}")
@@ -70,5 +72,14 @@ public class OrderController {
     public ResponseEntity changeStatus(@PathVariable(name = "nextStatus") String nextStatus, @PathVariable(name = "orderId") Long orderId){
         orderService.changeStatus(orderId,nextStatus);
         return new ResponseEntity(HttpStatus.OK);
+    }
+    @PostMapping("excel")
+    public ResponseEntity updloadOrders(@RequestParam("file")MultipartFile file){
+        try {
+            orderService.getOrdersFromExcel(file.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new ResponseEntity (HttpStatus.OK);
     }
 }
