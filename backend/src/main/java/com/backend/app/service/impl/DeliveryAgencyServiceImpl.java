@@ -31,8 +31,8 @@ public class DeliveryAgencyServiceImpl implements DeliveryAgencyService {
     }
 
     @Override
-    public void deleteAgency(Long Id) {
-        deliveryAgencyRepository.deleteById(Id);
+    public void deleteAgency(String agencyName) {
+        deliveryAgencyRepository.deleteDeliveryAgencyByAgencyName(agencyName);
     }
 
     @Override

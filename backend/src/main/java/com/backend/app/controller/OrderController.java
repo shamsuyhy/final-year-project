@@ -7,6 +7,10 @@ import com.backend.app.service.OrderService;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +39,18 @@ public class OrderController {
         orderService.addOrders(orders);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @PostMapping("status/orders/{nextStatus}/{typeOfChange}")
+    public ResponseEntity changeStatusAll(@RequestBody List<Order> orders, @PathVariable(name = "nextStatus") String nextStatus,@PathVariable(name = "typeOfChange")String typeOfChange){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName="yahia";
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            currentUserName = authentication.getName();
+
+        }
+
+        orderService.changeStatusAll(orders,nextStatus,typeOfChange);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
     @GetMapping
     public List<Order> getOrders(){
         return orderService.getAllOrders();
@@ -50,12 +66,6 @@ public class OrderController {
     public ResponseEntity<Order> getUser(@PathVariable(name = "orderId") Long orderId) {
         return new ResponseEntity<Order>(orderService.getOrderById(orderId), HttpStatus.OK);
     }
-    @PostMapping("{orderId}/{status}/{username}")
-    public ResponseEntity addStatus(@PathVariable(name = "orderId") Long orderId,@PathVariable(name = "status") String status,@PathVariable(name = "username") String username){
-
-        orderService.addStatus(orderId,status,username);
-        return new ResponseEntity(HttpStatus.OK);
-    }
     @GetMapping("status/{currentStatus}")
     public List<Order> getOrderByStatus(@PathVariable(name = "currentStatus")String currentStatus){
         return orderService.getOrdersByStatus(currentStatus);
@@ -68,11 +78,7 @@ public class OrderController {
     public ResponseEntity<Long> count(@PathVariable(name = "currentStatus") String currentStatus){
         return new ResponseEntity<>(orderService.countByStatus(currentStatus),HttpStatus.OK);
     }
-    @PutMapping("status/{nextStatus}/{orderId}")
-    public ResponseEntity changeStatus(@PathVariable(name = "nextStatus") String nextStatus, @PathVariable(name = "orderId") Long orderId){
-        orderService.changeStatus(orderId,nextStatus);
-        return new ResponseEntity(HttpStatus.OK);
-    }
+
     @PostMapping("excel")
     public ResponseEntity updloadOrders(@RequestParam("file")MultipartFile file){
         try {
@@ -81,5 +87,20 @@ public class OrderController {
             throw new RuntimeException(e);
         }
         return new ResponseEntity (HttpStatus.OK);
+    }
+    @DeleteMapping
+    public ResponseEntity deletAllorders(){
+        orderService.deleteAllOrders();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PostMapping("/addOrder")
+    public ResponseEntity<Order> addOrder(@RequestBody Order order){
+        return new ResponseEntity<Order>(orderService.addOrder(order),HttpStatus.CREATED);
+    }
+    @PostMapping("addOrder/{orderId}")
+    public ResponseEntity placeOrders(@RequestBody List<ProductOrder> productOrders, @PathVariable(name = "orderId") Long orderId){
+
+        orderService.placeProductOrders(productOrders,orderId);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

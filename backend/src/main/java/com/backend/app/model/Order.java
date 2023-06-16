@@ -305,5 +305,8 @@ public class Order {
     public void removeProduct(ProductOrder productOrder){
         productOrders.remove(productOrder);
     }
+    public void removeAllProductOrders(){
+        productOrders.removeAll(productOrders);
+    }
 
 }

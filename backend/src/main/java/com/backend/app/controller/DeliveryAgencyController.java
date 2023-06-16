@@ -2,6 +2,8 @@ package com.backend.app.controller;
 
 import com.backend.app.model.DeliveryAgency;
 import com.backend.app.service.DeliveryAgencyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +16,11 @@ public class DeliveryAgencyController {
     public DeliveryAgencyController(DeliveryAgencyService deliveryAgencyService) {
         this.deliveryAgencyService = deliveryAgencyService;
     }
+    @DeleteMapping("/delete/{agencyName}")
+     public ResponseEntity deleteAgency(@PathVariable (name = "agencyName") String agencyName){
+        deliveryAgencyService.deleteAgency(agencyName);
+        return new ResponseEntity(HttpStatus.OK);
+     }
 
     @PostMapping("addAgency")
     public DeliveryAgency addAgency(@RequestBody DeliveryAgency deliveryAgency){

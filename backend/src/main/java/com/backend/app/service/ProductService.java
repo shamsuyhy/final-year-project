@@ -11,6 +11,6 @@ public interface ProductService {
     List<Product> addProducts(List<Product>products);
     void deleteProduct(Product product);
     void deleteProductById(String id);
-
+    void deleteAllProducts();
 
 }

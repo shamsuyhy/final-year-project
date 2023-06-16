@@ -10,9 +10,11 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -50,39 +52,18 @@ public class OrderServiceImpl implements OrderService {
         return null;
     }
 
-    @Override
-    public void confirmOrder(Long id) {
-
-    }
-
-    @Override
-    public void dispatchOrder(Long id) {
-
-    }
-
-    @Override
-    public void shipOrder(Long id) {
-
-    }
-
-    @Override
-    public void cancelOrder(Long id) {
-
-    }
-
-    @Override
-    public void deliverOrder(Long id) {
-
-    }
-
-    @Override
-    public void returnOrder(Long id) {
-
-    }
 
     @Override
     public Order addOrder(Order order) {
+        order.addStatus(new Status(order, "Admin", LocalDateTime.now(), "in-confirmation", "created"));
         return orderRepository.save(order);
+    }
+
+    @Override
+    public void placeProductOrders(List<ProductOrder> productOrders, Long orderId) {
+        Order order = getOrderById(orderId);
+        productOrders.forEach(data -> order.addProduct(new ProductOrder(new ProductOrderId(orderId, data.getProductOrderId().getProductId()),order,productService.getProductById(data.getProductOrderId().getProductId()),data.getQuantity(),data.getUnitPrice())));
+        orderRepository.save(order);
     }
 
     @Override
@@ -95,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
     public void placeProductOrder(Long orderId, String productId, Integer quantity) {
         Order order = getOrderById(orderId);
         Product product = productService.getProductById(productId);
-        order.addProduct(new ProductOrder(new ProductOrderId(orderId, productId), order, product, quantity, product.getProductPrice()));
+        order.addProduct(new ProductOrder(new ProductOrderId(orderId, productId), order, product, quantity, product.getProductPrice()*quantity));
         orderRepository.save(order);
     }
 
@@ -129,13 +110,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void changeStatus(Long orderId, String nextStatus) {
+    public void changeStatus(Long orderId, String nextStatus, String typeOfChange) {
         Order order = getOrderById(orderId);
         order.setCurrentStatus(nextStatus);
         order.setCurrentStatusDate(LocalDateTime.now());
-        order.addStatus(new Status(order, "admin", LocalDateTime.now(), nextStatus, ""));
-        orderRepository.save(order);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName="sami";
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            currentUserName = authentication.getName();
 
+        }
+        order.addStatus(new Status(order, currentUserName, LocalDateTime.now(), nextStatus, typeOfChange));
+        orderRepository.save(order);
+    }
+    public  void changeStatusAll(List<Order> orders, String nextStatus, String typeOfChange){
+        orders.stream().forEach( (order) -> changeStatus(order.getOrderId(),nextStatus,typeOfChange));
     }
 
     @Override
@@ -179,6 +168,13 @@ public class OrderServiceImpl implements OrderService {
                     }
                     cellIndex++;
                 }
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String currentUserName="admin";
+                if (!(authentication instanceof AnonymousAuthenticationToken)) {
+                    currentUserName = authentication.getName();
+
+                }
+                order.addStatus(new Status(order, currentUserName, LocalDateTime.now(), "in-confirmation", "added at"));
                 orderId = orderRepository.save(order).getOrderId();
                 placeProductOrder(orderId, productId, quantity);
 
@@ -187,6 +183,11 @@ public class OrderServiceImpl implements OrderService {
             e.getStackTrace();
         }
         return orders;
+    }
+
+    @Override
+    public void deleteAllOrders() {
+        orderRepository.deleteAll();
     }
 
 }
