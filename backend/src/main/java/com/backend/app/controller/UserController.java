@@ -46,5 +46,12 @@ public class UserController {
         this.userService.deleteUser(username);
         return new ResponseEntity(HttpStatus.OK);
     }
+    @PostMapping("assignUser/{username}")
+    public ResponseEntity assignUser(@RequestBody List<Long> orderIds, @PathVariable(name = "username") String username) {
+        this.userService.assignOrders(orderIds,username);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+
 
 }

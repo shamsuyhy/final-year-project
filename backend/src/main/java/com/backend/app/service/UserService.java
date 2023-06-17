@@ -13,4 +13,5 @@ public interface UserService {
     void deleteUser(String username);
     List<User> addUsers(List<User> users);
 
+    void assignOrders(List<Long> orderIds, String username);
 }

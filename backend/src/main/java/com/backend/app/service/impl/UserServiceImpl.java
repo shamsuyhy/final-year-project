@@ -1,7 +1,9 @@
 package com.backend.app.service.impl;
 
 import com.backend.app.exception.ResourceNotFoundException;
+import com.backend.app.model.Order;
 import com.backend.app.model.User;
+import com.backend.app.repository.OrderRepository;
 import com.backend.app.repository.UserRepository;
 import com.backend.app.service.UserService;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
+    private OrderRepository orderRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, OrderRepository orderRepository) {
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -51,5 +55,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> addUsers(List<User> users) {
         return userRepository.saveAll(users);
+    }
+
+    @Override
+    public void assignOrders(List<Long> orderIds, String username) {
+        User user= userRepository.getReferenceById(username);
+        List<Order> orders =orderRepository.findAllById(orderIds);
+        user.assignOrders(orders);
+        userRepository.save(user);
     }
 }

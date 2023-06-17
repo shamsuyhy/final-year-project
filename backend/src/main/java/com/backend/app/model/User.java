@@ -178,4 +178,9 @@ public class User implements UserDetails {
             order.setUser(null);
         }
     }
+
+    public void assignOrders(List<Order> newOrders){
+        newOrders.stream().forEach(order -> order.setUser(this));
+        this.orders.addAll(newOrders);
+    }
 }

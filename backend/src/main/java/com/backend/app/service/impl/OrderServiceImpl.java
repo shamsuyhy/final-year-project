@@ -6,6 +6,7 @@ import com.backend.app.repository.OrderRepository;
 import com.backend.app.repository.ProductOrderRepository;
 import com.backend.app.service.OrderService;
 import com.backend.app.service.ProductService;
+import com.backend.app.service.UserService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -30,11 +31,14 @@ public class OrderServiceImpl implements OrderService {
     OrderRepository orderRepository;
     ProductOrderRepository productOrderRepository;
     ProductService productService;
+    UserService userService;
 
-    public OrderServiceImpl(OrderRepository orderRepository, ProductOrderRepository productOrderRepository, ProductService productService) {
+    public OrderServiceImpl(OrderRepository orderRepository, ProductOrderRepository productOrderRepository, ProductService productService, UserService userService) {
         this.orderRepository = orderRepository;
         this.productOrderRepository = productOrderRepository;
         this.productService = productService;
+        this.userService=userService;
+
     }
 
     @Override
@@ -92,6 +96,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrdersByStatus(String currentStatus) {
+
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName="yahia";
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            currentUserName = authentication.getName();
+
+        }
+        User user = userService.getUserByUserName(currentUserName);
+        if(user.getRole() == Role.phoneAgent){
+            return orderRepository.findOrdersByCurrentStatusAndUser(currentStatus,user);
+        }
         return orderRepository.findOrderByCurrentStatus(currentStatus);
     }
 
@@ -174,6 +190,7 @@ public class OrderServiceImpl implements OrderService {
                     currentUserName = authentication.getName();
 
                 }
+                order.setTotalPrice(quantity*productService.getProductById(productId).getProductPrice());
                 order.addStatus(new Status(order, currentUserName, LocalDateTime.now(), "in-confirmation", "added at"));
                 orderId = orderRepository.save(order).getOrderId();
                 placeProductOrder(orderId, productId, quantity);
